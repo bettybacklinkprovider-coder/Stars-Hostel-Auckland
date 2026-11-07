@@ -1,0 +1,6 @@
+{
+  "name": "Stars Hostel Auckland",
+  "description": "Modern, premium boutique hostel in Eden Terrace, Auckland, New Zealand. Featuring luxury bunk pods, private rooms, and social facilities.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
