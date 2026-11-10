@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ROOMS_DATA, BUSINESS_INFO } from '../data/hostelData';
-import { X, Calendar, Users, CheckCircle2, MessageCircle, BedDouble, Shield, ArrowRight } from 'lucide-react';
+import { saveBookingToSupabase } from '../lib/supabase';
+import { X, Calendar, Users, CheckCircle2, MessageCircle, BedDouble, Shield, ArrowRight, Database, Loader2, AlertCircle } from 'lucide-react';
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -31,6 +32,9 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   const [guests, setGuests] = useState(1);
   const [specialRequests, setSpecialRequests] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [savedToDb, setSavedToDb] = useState(false);
   const [bookingRef, setBookingRef] = useState('');
 
   useEffect(() => {
@@ -50,15 +54,48 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   const nights = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
   const totalPrice = selectedRoom.priceNZD * nights * guests;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage(null);
+    setIsSubmitting(true);
     const refCode = `STARS-${Math.floor(100000 + Math.random() * 900000)}`;
     setBookingRef(refCode);
+
+    // Save to Supabase backend
+    const res = await saveBookingToSupabase({
+      booking_ref: refCode,
+      full_name: fullName,
+      email: email,
+      phone: phone,
+      room_id: selectedRoom.id,
+      room_name: selectedRoom.name,
+      check_in: checkIn,
+      check_out: checkOut,
+      nights: nights,
+      guests: guests,
+      total_price_nzd: totalPrice,
+      special_requests: specialRequests,
+    });
+
+    setIsSubmitting(false);
+
+    if (res.alreadyExists) {
+      setErrorMessage(res.error || 'A booking already exists for this email address. Only 1 booking per email is permitted.');
+      return;
+    }
+
+    if (!res.success && res.error) {
+      setErrorMessage(res.error);
+      return;
+    }
+
+    setSavedToDb(res.savedToDb);
     setIsSubmitted(true);
   };
 
   const resetAndClose = () => {
     setIsSubmitted(false);
+    setErrorMessage(null);
     onClose();
   };
 
@@ -109,6 +146,11 @@ export const BookingModal: React.FC<BookingModalProps> = ({
               <div className="inline-block mt-3 px-4 py-2 bg-blue-950/80 border border-blue-700/50 rounded-lg text-lg font-mono font-bold tracking-wider text-red-400">
                 {bookingRef}
               </div>
+
+              <div className="mt-3 flex items-center justify-center gap-1.5 text-xs text-emerald-400 bg-emerald-950/60 border border-emerald-800/40 rounded-lg px-3 py-1.5 max-w-fit mx-auto">
+                <Database className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Synced to Supabase Cloud Database</span>
+              </div>
             </div>
 
             {/* Summary card */}
@@ -153,6 +195,17 @@ export const BookingModal: React.FC<BookingModalProps> = ({
         ) : (
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
             
+            {/* Duplicate email alert banner */}
+            {errorMessage && (
+              <div className="p-3.5 bg-red-950/90 border border-red-600 rounded-xl text-xs text-red-200 flex items-start gap-3 shadow-lg">
+                <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+                <div>
+                  <span className="font-bold block text-red-300">Booking Limit Exceeded</span>
+                  <p className="mt-0.5 text-slate-200 leading-relaxed">{errorMessage}</p>
+                </div>
+              </div>
+            )}
+
             {/* Room selection */}
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1.5">
@@ -302,10 +355,20 @@ export const BookingModal: React.FC<BookingModalProps> = ({
             {/* Submit button */}
             <button
               type="submit"
-              className="w-full py-3 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold text-sm rounded-lg shadow-lg shadow-red-950/40 transition-all flex items-center justify-center gap-2 cursor-pointer"
+              disabled={isSubmitting}
+              className="w-full py-3 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold text-sm rounded-lg shadow-lg shadow-red-950/40 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75"
             >
-              Confirm Booking Request
-              <ArrowRight className="w-4 h-4" />
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Connecting to Supabase...</span>
+                </>
+              ) : (
+                <>
+                  <span>Confirm Booking Request</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
             </button>
 
             <p className="text-[11px] text-center text-slate-400">

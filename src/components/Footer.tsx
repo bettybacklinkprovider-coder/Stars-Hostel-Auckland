@@ -1,14 +1,15 @@
 import React from 'react';
 import { PageId } from '../types';
 import { BUSINESS_INFO } from '../data/hostelData';
-import { MapPin, Phone, Mail, Star, MessageCircle, Clock, ShieldCheck, Heart } from 'lucide-react';
+import { MapPin, Phone, Mail, Star, MessageCircle, Clock, ShieldCheck, Heart, Database } from 'lucide-react';
 
 interface FooterProps {
   setCurrentPage: (page: PageId) => void;
   onOpenBookingModal: () => void;
+  onOpenSupabaseModal?: () => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ setCurrentPage, onOpenBookingModal }) => {
+export const Footer: React.FC<FooterProps> = ({ setCurrentPage, onOpenBookingModal, onOpenSupabaseModal }) => {
   const handleNav = (page: PageId) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -180,9 +181,22 @@ export const Footer: React.FC<FooterProps> = ({ setCurrentPage, onOpenBookingMod
         {/* Bottom bar */}
         <div className="mt-14 pt-8 border-t border-blue-950 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
           <p>© {new Date().getFullYear()} Stars Hostel Auckland. All rights reserved.</p>
-          <div className="flex items-center gap-1 text-slate-400">
-            <span>Kia Ora & Welcome to Aotearoa New Zealand</span>
-            <Heart className="w-3.5 h-3.5 text-red-500 inline fill-red-500 ml-1" />
+          
+          <div className="flex flex-wrap items-center gap-3">
+            {onOpenSupabaseModal && (
+              <button
+                onClick={onOpenSupabaseModal}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-blue-950/80 hover:bg-blue-900 border border-emerald-500/40 text-emerald-400 font-semibold text-[11px] transition-colors cursor-pointer"
+                title="View Supabase Database Connection & Live Bookings"
+              >
+                <Database className="w-3.5 h-3.5" />
+                <span>Supabase Connected</span>
+              </button>
+            )}
+            <div className="flex items-center gap-1 text-slate-400">
+              <span>Kia Ora & Welcome to Aotearoa New Zealand</span>
+              <Heart className="w-3.5 h-3.5 text-red-500 inline fill-red-500 ml-1" />
+            </div>
           </div>
         </div>
       </div>

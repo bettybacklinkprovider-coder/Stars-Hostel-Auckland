@@ -79,10 +79,60 @@ export const HomePage: React.FC<HomePageProps> = ({
     <div className="min-h-screen bg-[#070d1e] text-slate-100">
       
       {/* ========================================================
-          SECTION 1: HERO SECTION
+          STICKY QUICK SECTION NAV BAR
+          Allows instant navigation across all 6 Home Page Sections
+      ======================================================== */}
+      <div className="sticky top-20 z-40 bg-[#070e24]/90 backdrop-blur-md border-b border-blue-900/60 py-2.5 px-4 shadow-md">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-red-400 whitespace-nowrap shrink-0">
+            <span>6 Home Sections:</span>
+          </div>
+          <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto text-xs whitespace-nowrap">
+            <a
+              href="#section-1-hero"
+              className="px-3 py-1 rounded-full bg-blue-950/80 hover:bg-red-600 text-slate-300 hover:text-white border border-blue-800/60 transition-all font-medium"
+            >
+              1. Hero
+            </a>
+            <a
+              href="#section-2-about"
+              className="px-3 py-1 rounded-full bg-blue-950/80 hover:bg-red-600 text-slate-300 hover:text-white border border-blue-800/60 transition-all font-medium"
+            >
+              2. About Hostel
+            </a>
+            <a
+              href="#section-3-rooms"
+              className="px-3 py-1 rounded-full bg-blue-950/80 hover:bg-red-600 text-slate-300 hover:text-white border border-blue-800/60 transition-all font-medium"
+            >
+              3. Our Rooms
+            </a>
+            <a
+              href="#section-4-facilities"
+              className="px-3 py-1 rounded-full bg-blue-950/80 hover:bg-red-600 text-slate-300 hover:text-white border border-blue-800/60 transition-all font-medium"
+            >
+              4. Facilities
+            </a>
+            <a
+              href="#section-5-gallery"
+              className="px-3 py-1 rounded-full bg-blue-950/80 hover:bg-red-600 text-slate-300 hover:text-white border border-blue-800/60 transition-all font-medium"
+            >
+              5. Gallery
+            </a>
+            <a
+              href="#section-6-contact"
+              className="px-3 py-1 rounded-full bg-blue-950/80 hover:bg-red-600 text-slate-300 hover:text-white border border-blue-800/60 transition-all font-medium"
+            >
+              6. Reviews & Contact
+            </a>
+          </div>
+        </div>
+      </div>
+
+      {/* ========================================================
+          SECTION 1: HERO SECTION (1 OF 6)
           Large beautiful hostel interior image, headline, and Book Now button
       ======================================================== */}
-      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden border-b border-blue-900/40">
+      <section id="section-1-hero" className="relative min-h-[90vh] flex items-center justify-center overflow-hidden border-b border-blue-900/40 scroll-mt-28">
         {/* Background Image with Dark Navy & Red Gradient Overlays */}
         <div className="absolute inset-0 z-0">
           <img
@@ -98,6 +148,13 @@ export const HomePage: React.FC<HomePageProps> = ({
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
           
+          {/* Section Indicator Pill */}
+          <div className="mb-4 inline-flex items-center gap-2 px-3 py-1 rounded-md bg-red-600/90 text-white text-[11px] font-extrabold uppercase tracking-widest shadow-md">
+            <span>Section 1 of 6</span>
+            <span>·</span>
+            <span>Hero & Overview</span>
+          </div>
+
           {/* Subtle Location & Rating Bar */}
           <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-blue-950/80 border border-blue-800/60 shadow-lg backdrop-blur-md mb-8">
             <div className="flex items-center text-amber-400">
@@ -182,11 +239,19 @@ export const HomePage: React.FC<HomePageProps> = ({
 
 
       {/* ========================================================
-          SECTION 2: ABOUT OUR HOSTEL
+          SECTION 2: ABOUT OUR HOSTEL (2 OF 6)
           Introduction to Stars Hostel
       ======================================================== */}
-      <section className="py-24 bg-[#0a122e] border-b border-blue-900/40">
+      <section id="section-2-about" className="py-24 bg-[#0a122e] border-b border-blue-900/40 scroll-mt-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          {/* Section Indicator Pill */}
+          <div className="mb-8 inline-flex items-center gap-2 px-3 py-1 rounded-md bg-red-600/90 text-white text-[11px] font-extrabold uppercase tracking-widest shadow-md">
+            <span>Section 2 of 6</span>
+            <span>·</span>
+            <span>About Our Hostel</span>
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             
             {/* Visual representation */}
@@ -302,12 +367,19 @@ export const HomePage: React.FC<HomePageProps> = ({
 
 
       {/* ========================================================
-          SECTION 3: OUR ROOMS
+          SECTION 3: OUR ROOMS (3 OF 6)
           Beautiful room images and room descriptions
       ======================================================== */}
-      <section className="py-24 bg-[#070d1e] border-b border-blue-900/40">
+      <section id="section-3-rooms" className="py-24 bg-[#070d1e] border-b border-blue-900/40 scroll-mt-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
+          {/* Section Indicator Pill */}
+          <div className="mb-4 inline-flex items-center gap-2 px-3 py-1 rounded-md bg-red-600/90 text-white text-[11px] font-extrabold uppercase tracking-widest shadow-md">
+            <span>Section 3 of 6</span>
+            <span>·</span>
+            <span>Our Rooms & Pods</span>
+          </div>
+
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
             <div>
               <span className="text-xs font-bold uppercase tracking-widest text-red-400">
@@ -418,12 +490,21 @@ export const HomePage: React.FC<HomePageProps> = ({
 
 
       {/* ========================================================
-          SECTION 4: FACILITIES & AMENITIES
+          SECTION 4: FACILITIES & AMENITIES (4 OF 6)
           Free Wi-Fi, comfortable beds, shared kitchen, bathrooms and common areas
       ======================================================== */}
-      <section className="py-24 bg-[#0a122e] border-b border-blue-900/40">
+      <section id="section-4-facilities" className="py-24 bg-[#0a122e] border-b border-blue-900/40 scroll-mt-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
+          {/* Section Indicator Pill */}
+          <div className="mb-4 text-center">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-red-600/90 text-white text-[11px] font-extrabold uppercase tracking-widest shadow-md">
+              <span>Section 4 of 6</span>
+              <span>·</span>
+              <span>Facilities & Amenities</span>
+            </div>
+          </div>
+
           <div className="text-center max-w-3xl mx-auto mb-16">
             <span className="text-xs font-bold uppercase tracking-widest text-red-400">
               Hostel Facilities & Services
@@ -507,12 +588,19 @@ export const HomePage: React.FC<HomePageProps> = ({
 
 
       {/* ========================================================
-          SECTION 5: GALLERY
+          SECTION 5: GALLERY (5 OF 6)
           Display 9 high-quality hostel photographs
       ======================================================== */}
-      <section className="py-24 bg-[#070d1e] border-b border-blue-900/40">
+      <section id="section-5-gallery" className="py-24 bg-[#070d1e] border-b border-blue-900/40 scroll-mt-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
+          {/* Section Indicator Pill */}
+          <div className="mb-4 inline-flex items-center gap-2 px-3 py-1 rounded-md bg-red-600/90 text-white text-[11px] font-extrabold uppercase tracking-widest shadow-md">
+            <span>Section 5 of 6</span>
+            <span>·</span>
+            <span>Visual Gallery</span>
+          </div>
+
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
             <div>
               <span className="text-xs font-bold uppercase tracking-widest text-red-400">
@@ -584,14 +672,20 @@ export const HomePage: React.FC<HomePageProps> = ({
 
 
       {/* ========================================================
-          SECTION 6: GUEST REVIEWS & CONTACT
+          SECTION 6: GUEST REVIEWS & CONTACT (6 OF 6)
           Testimonials, contact details and booking CTA
       ======================================================== */}
-      <section className="py-24 bg-[#0a122e]">
+      <section id="section-6-contact" className="py-24 bg-[#0a122e] scroll-mt-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
+          {/* Section Indicator Pill */}
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <span className="text-xs font-bold uppercase tracking-widest text-red-400">
+            <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-md bg-red-600/90 text-white text-[11px] font-extrabold uppercase tracking-widest shadow-md">
+              <span>Section 6 of 6</span>
+              <span>·</span>
+              <span>Reviews & Contact</span>
+            </div>
+            <span className="block text-xs font-bold uppercase tracking-widest text-red-400">
               Trusted by Global Backpackers
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mt-2 font-display">

@@ -47,7 +47,7 @@ export const ROOMS_DATA: RoomType[] = [
     priceNZD: 42,
     capacity: '1 Guest per Pod',
     bedType: '1 Custom Pod Bed',
-    image: '/images/hostel_bunk_pods_1794036886509.jpg',
+    image: '/images/hostel_female_dorm_1794044793894.jpg',
     description: 'Designed exclusively for female travelers seeking safety, privacy, and quiet comfort. Features custom oak timber pods with full-length privacy curtains.',
     features: [
       'Full blackout privacy curtain on every pod',
@@ -86,7 +86,7 @@ export const ROOMS_DATA: RoomType[] = [
     priceNZD: 32,
     capacity: '1 Guest per Bed',
     bedType: '1 Single Pod Bunk',
-    image: '/images/hostel_bunk_pods_1794036886509.jpg',
+    image: '/images/hostel_social_8dorm_1794044794556.jpg',
     description: 'The premier budget-friendly option for solo adventurers and international backpackers eager to meet fellow globetrotters and explore Auckland together.',
     features: [
       'Cozy bunk bed with premium pocket-spring mattress',
@@ -105,7 +105,7 @@ export const ROOMS_DATA: RoomType[] = [
     priceNZD: 95,
     capacity: '2 Guests',
     bedType: '2 Single Beds',
-    image: '/images/hostel_private_room_1794036887553.jpg',
+    image: '/images/hostel_twin_room_1794044793604.jpg',
     description: 'Ideal for traveling friends or colleagues. Two comfortable single beds, generous floor space, clothes storage, and close proximity to modern shared rain showers.',
     features: [
       'Two comfortable single beds with hotel linens',
@@ -124,7 +124,7 @@ export const ROOMS_DATA: RoomType[] = [
     priceNZD: 85,
     capacity: '1 Guest',
     bedType: '1 Double Bed',
-    image: '/images/hostel_private_room_1794036887553.jpg',
+    image: '/images/hostel_coworking_nook_1794044795660.jpg',
     description: 'A private room tailored for solo backpackers or digital nomads wanting their own quiet bedroom while enjoying the hostel’s lively social community.',
     features: [
       'Double bed with hypoallergenic pillows',
@@ -144,7 +144,7 @@ export const AMENITIES_DATA: AmenityItem[] = [
     title: 'High-Speed Fiber Wi-Fi',
     description: 'Ultra-fast gigabit broadband across all bedrooms, common lounge, kitchen, and the outdoor terrace.',
     iconName: 'Wifi',
-    image: '/images/hostel_private_room_1794036887553.jpg',
+    image: '/images/hostel_coworking_nook_1794044795660.jpg',
   },
   {
     id: 'kitchen',
@@ -200,7 +200,7 @@ export const AMENITIES_DATA: AmenityItem[] = [
 export const GALLERY_PHOTOS: GalleryPhoto[] = [
   {
     id: 'gal-1',
-    title: 'Social Lounge & Sky Tower Vistas',
+    title: 'Sky Tower Vistas & Social Lobby',
     category: 'lounge',
     image: '/images/hero_stars_hostel_1794036885732.jpg',
     caption: 'Our warm communal living room overlooking Auckland City and the iconic Sky Tower.',
@@ -264,35 +264,35 @@ export const GALLERY_PHOTOS: GalleryPhoto[] = [
   },
   {
     id: 'gal-9',
-    title: 'Auckland Sunset on the Outdoor Deck',
-    category: 'outdoor',
-    image: '/images/hostel_outdoor_patio_1794036888006.jpg',
-    caption: 'Fairy lights illuminate the terrace deck as the sun sets over Eden Terrace and the cityscape.',
-    tag: 'Terrace & Patio'
+    title: 'Female Sanctuary 4-Bed Dorm Pods',
+    category: 'rooms',
+    image: '/images/hostel_female_dorm_1794044793894.jpg',
+    caption: 'Exclusive female dormitory with private wood pods, soft reading lighting, and quiet sanctuary feel.',
+    tag: 'Female Dorm'
   },
   {
     id: 'gal-10',
-    title: 'Cozy Evening Fireplace & Reading Lounge',
+    title: 'Cinema Movie & Board Games Lounge',
     category: 'lounge',
-    image: '/images/hero_stars_hostel_1794036885732.jpg',
-    caption: 'Unwind with a book or join an impromptu movie night with fellow backpackers from around the globe.',
-    tag: 'Social Lounge'
+    image: '/images/hostel_movie_games_room_1794044796123.jpg',
+    caption: 'Plush velvet sofas, huge film projection screen, and board game library for social evenings.',
+    tag: 'Movie Lounge'
   },
   {
     id: 'gal-11',
-    title: 'Boutique Dorm Pod Berth with Reading Lamp',
-    category: 'rooms',
-    image: '/images/hostel_bunk_pods_1794036886509.jpg',
-    caption: 'Private sleeping pod engineered for silence, comfort, and restorative sleep after travel.',
-    tag: 'Dormitory Pods'
+    title: 'Barista Espresso & Breakfast Bar',
+    category: 'kitchen',
+    image: '/images/hostel_coffee_breakfast_1794044796111.jpg',
+    caption: 'Start your morning with freshly brewed espresso, muesli jars, fresh fruits, and Kiwi hospitality.',
+    tag: 'Coffee Bar'
   },
   {
     id: 'gal-12',
-    title: 'Digital Nomad Work Desk in Room',
-    category: 'rooms',
-    image: '/images/hostel_private_room_1794036887553.jpg',
-    caption: 'Ergonomic wooden workstation equipped with high-speed fiber Wi-Fi for remote workers.',
-    tag: 'Work Nook'
+    title: 'Digital Nomad Skyline Co-Working Desk',
+    category: 'lounge',
+    image: '/images/hostel_coworking_nook_1794044795660.jpg',
+    caption: 'Panoramic views of the Auckland harbor and Sky Tower with ergonomic desks and gigabit fiber.',
+    tag: 'Co-Working'
   }
 ];
 

@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { PageId } from '../types';
 import { BUSINESS_INFO, ROOMS_DATA, FAQ_ITEMS } from '../data/hostelData';
+import { saveBookingToSupabase, saveMessageToSupabase } from '../lib/supabase';
 import {
   MapPin,
   Phone,
   Mail,
   Clock,
   MessageCircle,
+  MessageSquare,
   Calendar,
   Users,
   CheckCircle2,
@@ -16,7 +18,12 @@ import {
   ChevronDown,
   ChevronUp,
   ShieldCheck,
-  Send
+  Send,
+  Database,
+  Loader2,
+  AlertCircle,
+  User,
+  Bed
 } from 'lucide-react';
 
 interface ContactPageProps {
@@ -24,6 +31,9 @@ interface ContactPageProps {
 }
 
 export const ContactPage: React.FC<ContactPageProps> = ({ setCurrentPage }) => {
+  // Tab: 'booking' | 'message'
+  const [activeFormTab, setActiveFormTab] = useState<'booking' | 'message'>('booking');
+
   // Tomorrow's date
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -43,7 +53,21 @@ export const ContactPage: React.FC<ContactPageProps> = ({ setCurrentPage }) => {
   const [guests, setGuests] = useState(1);
   const [specialRequests, setSpecialRequests] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [savedToDb, setSavedToDb] = useState(false);
   const [bookingRef, setBookingRef] = useState('');
+
+  // Direct Message to Owner State
+  const [msgName, setMsgName] = useState('');
+  const [msgEmail, setMsgEmail] = useState('');
+  const [msgPhone, setMsgPhone] = useState('');
+  const [msgSubject, setMsgSubject] = useState('General Question for Owner');
+  const [msgBody, setMsgBody] = useState('');
+  const [isMsgSubmitting, setIsMsgSubmitting] = useState(false);
+  const [isMsgSubmitted, setIsMsgSubmitted] = useState(false);
+  const [msgError, setMsgError] = useState<string | null>(null);
+  const [msgSavedToDb, setMsgSavedToDb] = useState(false);
 
   // FAQ Accordion State
   const [expandedFaq, setExpandedFaq] = useState<number | null>(0);
@@ -57,11 +81,67 @@ export const ContactPage: React.FC<ContactPageProps> = ({ setCurrentPage }) => {
   const nights = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
   const totalPrice = selectedRoom.priceNZD * nights * guests;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage(null);
+    setIsSubmitting(true);
     const refCode = `STARS-${Math.floor(100000 + Math.random() * 900000)}`;
     setBookingRef(refCode);
+
+    // Save to Supabase Cloud
+    const res = await saveBookingToSupabase({
+      booking_ref: refCode,
+      full_name: fullName,
+      email: email,
+      phone: phone,
+      room_id: selectedRoom.id,
+      room_name: selectedRoom.name,
+      check_in: checkIn,
+      check_out: checkOut,
+      nights: nights,
+      guests: guests,
+      total_price_nzd: totalPrice,
+      special_requests: specialRequests,
+    });
+
+    setIsSubmitting(false);
+
+    if (res.alreadyExists) {
+      setErrorMessage(res.error || 'A booking already exists for this email address. Only 1 booking per email is permitted.');
+      return;
+    }
+
+    if (!res.success && res.error) {
+      setErrorMessage(res.error);
+      return;
+    }
+
+    setSavedToDb(res.savedToDb);
     setIsSubmitted(true);
+  };
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setMsgError(null);
+    setIsMsgSubmitting(true);
+
+    const res = await saveMessageToSupabase({
+      full_name: msgName,
+      email: msgEmail,
+      phone: msgPhone || undefined,
+      subject: msgSubject,
+      message: msgBody,
+    });
+
+    setIsMsgSubmitting(false);
+
+    if (!res.success && res.error) {
+      setMsgError(res.error);
+      return;
+    }
+
+    setMsgSavedToDb(res.savedToDb);
+    setIsMsgSubmitted(true);
   };
 
   const whatsappInquiryUrl = `https://wa.me/${BUSINESS_INFO.rawPhone}?text=${encodeURIComponent(
@@ -87,28 +167,95 @@ export const ContactPage: React.FC<ContactPageProps> = ({ setCurrentPage }) => {
           </p>
         </div>
 
+        {/* Visual Hostel Location Banner */}
+        <div className="relative mb-14 rounded-3xl overflow-hidden border border-blue-800/60 shadow-2xl h-64 sm:h-80">
+          <img
+            src="/images/hero_stars_hostel_1794036885732.jpg"
+            alt="Stars Hostel Auckland Reception & Lounge"
+            referrerPolicy="no-referrer"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#070e24] via-[#070e24]/60 to-transparent" />
+          <div className="absolute bottom-6 left-6 right-6 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
+            <div>
+              <span className="text-xs font-bold uppercase tracking-widest text-red-400 bg-blue-950/80 px-2.5 py-1 rounded-md border border-blue-800/60">
+                Auckland Headquarters
+              </span>
+              <h2 className="text-xl sm:text-2xl font-bold text-white mt-2">
+                Stars Hostel · 6a Glenside Crescent
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-300">
+                Eden Terrace, Auckland 1010, New Zealand · Phone: +64 21 938 777
+              </p>
+            </div>
+            <a
+              href={BUSINESS_INFO.whatsappUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-colors shadow-lg flex items-center gap-2 whitespace-nowrap cursor-pointer"
+            >
+              <MessageCircle className="w-4 h-4" />
+              <span>Instant WhatsApp Booking</span>
+            </a>
+          </div>
+        </div>
+
         {/* 2-Column Main Section: Booking Form & Contact Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
           
-          {/* LEFT: Booking Inquiry Form (7 cols) */}
+          {/* LEFT: Booking & Direct Message Form (7 cols) */}
           <div className="lg:col-span-7 bg-[#0b1538] border border-blue-900/60 rounded-3xl p-6 sm:p-10 shadow-2xl">
-            <div className="flex items-center justify-between pb-6 mb-6 border-b border-blue-900/50">
-              <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-red-400">
-                  Online Reservation Form
+            {/* Form Mode Tabs */}
+            <div className="grid grid-cols-2 p-1.5 bg-[#070e24] border border-blue-900/60 rounded-2xl mb-8">
+              <button
+                type="button"
+                onClick={() => setActiveFormTab('booking')}
+                className={`py-3 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                  activeFormTab === 'booking'
+                    ? 'bg-red-600 text-white shadow-lg shadow-red-950/60'
+                    : 'text-slate-400 hover:text-white hover:bg-blue-900/30'
+                }`}
+              >
+                <Bed className="w-4 h-4" />
+                <span>Room Booking</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveFormTab('message')}
+                className={`py-3 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer relative ${
+                  activeFormTab === 'message'
+                    ? 'bg-red-600 text-white shadow-lg shadow-red-950/60'
+                    : 'text-slate-400 hover:text-white hover:bg-blue-900/30'
+                }`}
+              >
+                <MessageSquare className="w-4 h-4" />
+                <span>Message Owner</span>
+                <span className="hidden sm:inline-block px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-blue-900/80 text-blue-200 uppercase">
+                  Direct
                 </span>
-                <h2 className="text-2xl font-bold text-white mt-1 font-display">
-                  Booking Inquiry
-                </h2>
-              </div>
-              <div className="text-right">
-                <span className="text-xs text-slate-400 block">Direct booking rate</span>
-                <span className="text-xs font-semibold text-emerald-400">No Booking Fee</span>
-              </div>
+              </button>
             </div>
 
-            {isSubmitted ? (
-              <div className="py-8 text-center space-y-6">
+            {/* TAB 1: BOOKING FORM */}
+            {activeFormTab === 'booking' ? (
+              <>
+                <div className="flex items-center justify-between pb-6 mb-6 border-b border-blue-900/50">
+                  <div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-red-400">
+                      Online Reservation Form
+                    </span>
+                    <h2 className="text-2xl font-bold text-white mt-1 font-display">
+                      Booking Inquiry
+                    </h2>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xs text-slate-400 block">Direct booking rate</span>
+                    <span className="text-xs font-semibold text-emerald-400">No Booking Fee</span>
+                  </div>
+                </div>
+
+                {isSubmitted ? (
+                  <div className="py-8 text-center space-y-6">
                 <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/30 rounded-full flex items-center justify-center mx-auto text-emerald-400">
                   <CheckCircle2 className="w-10 h-10" />
                 </div>
@@ -124,6 +271,11 @@ export const ContactPage: React.FC<ContactPageProps> = ({ setCurrentPage }) => {
                   </p>
                   <div className="inline-block mt-3 px-5 py-2.5 bg-blue-950/80 border border-blue-700/60 rounded-xl text-xl font-mono font-bold tracking-wider text-red-400">
                     {bookingRef}
+                  </div>
+
+                  <div className="mt-3 flex items-center justify-center gap-1.5 text-xs text-emerald-400 bg-emerald-950/60 border border-emerald-800/40 rounded-lg px-3 py-1.5 max-w-fit mx-auto">
+                    <Database className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Saved to Supabase Cloud Database (kvywjpwwnwaybqrveoqj)</span>
                   </div>
                 </div>
 
@@ -167,6 +319,20 @@ export const ContactPage: React.FC<ContactPageProps> = ({ setCurrentPage }) => {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
                 
+                {/* Duplicate email alert banner */}
+                {errorMessage && (
+                  <div className="p-4 bg-red-950/90 border border-red-600 rounded-2xl text-xs sm:text-sm text-red-200 flex items-start gap-3 shadow-xl">
+                    <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-bold block text-red-300">Booking Limit Exceeded</span>
+                      <p className="mt-1 text-slate-200 leading-relaxed">{errorMessage}</p>
+                      <p className="mt-1.5 text-[11px] text-red-300/80">
+                        Please contact reception via WhatsApp if you need to update an existing reservation.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 {/* Room Select */}
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
@@ -316,10 +482,20 @@ export const ContactPage: React.FC<ContactPageProps> = ({ setCurrentPage }) => {
                 {/* Submit button */}
                 <button
                   type="submit"
-                  className="w-full py-4 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold text-base rounded-xl shadow-xl shadow-red-950/50 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  disabled={isSubmitting}
+                  className="w-full py-4 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold text-base rounded-xl shadow-xl shadow-red-950/50 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75"
                 >
-                  <Send className="w-5 h-5" />
-                  <span>Send Booking Inquiry</span>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>Saving to Supabase Database...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-5 h-5" />
+                      <span>Send Booking Inquiry</span>
+                    </>
+                  )}
                 </button>
 
                 <p className="text-xs text-center text-slate-400">
@@ -327,7 +503,218 @@ export const ContactPage: React.FC<ContactPageProps> = ({ setCurrentPage }) => {
                 </p>
               </form>
             )}
+          </>
+        ) : (
+          /* TAB 2: DIRECT MESSAGE TO OWNER FORM */
+          <div>
+            <div className="flex items-center justify-between pb-6 mb-6 border-b border-blue-900/50">
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-red-400">
+                  Direct Hostel Communication
+                </span>
+                <h2 className="text-2xl font-bold text-white mt-1 font-display">
+                  Message the Owner
+                </h2>
+              </div>
+              <div className="text-right">
+                <span className="text-xs text-slate-400 block">Stars Hostel Auckland</span>
+                <span className="text-xs font-semibold text-red-400">Owner & Management</span>
+              </div>
+            </div>
+
+            {isMsgSubmitted ? (
+              <div className="py-8 text-center space-y-6">
+                <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/30 rounded-full flex items-center justify-center mx-auto text-emerald-400">
+                  <CheckCircle2 className="w-10 h-10" />
+                </div>
+                <div>
+                  <span className="text-xs font-bold tracking-wider uppercase text-emerald-400">
+                    Message Sent Successfully
+                  </span>
+                  <h3 className="text-2xl font-bold text-white mt-1">
+                    Thank You, {msgName}!
+                  </h3>
+                  <p className="text-sm text-slate-300 mt-2 max-w-md mx-auto">
+                    Your message regarding <strong className="text-white">"{msgSubject}"</strong> has been saved directly into our management inbox. The owner/manager will review it promptly.
+                  </p>
+
+                  <div className="mt-4 flex items-center justify-center gap-1.5 text-xs text-emerald-400 bg-emerald-950/60 border border-emerald-800/40 rounded-lg px-3 py-1.5 max-w-fit mx-auto">
+                    <Database className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Saved to Supabase 'messages' table (kvywjpwwnwaybqrveoqj)</span>
+                  </div>
+                </div>
+
+                <div className="bg-[#0c1a40] border border-blue-900/50 rounded-xl p-5 text-left text-xs space-y-2.5 max-w-md mx-auto">
+                  <div className="flex justify-between py-1 border-b border-blue-900/40">
+                    <span className="text-slate-400">Sender:</span>
+                    <span className="font-semibold text-white">{msgName} ({msgEmail})</span>
+                  </div>
+                  {msgPhone && (
+                    <div className="flex justify-between py-1 border-b border-blue-900/40">
+                      <span className="text-slate-400">Phone:</span>
+                      <span className="font-semibold text-white">{msgPhone}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between py-1 border-b border-blue-900/40">
+                    <span className="text-slate-400">Topic:</span>
+                    <span className="font-semibold text-red-300">{msgSubject}</span>
+                  </div>
+                  <div className="py-1">
+                    <span className="text-slate-400 block mb-1">Your Message:</span>
+                    <p className="text-slate-200 italic bg-[#070e24] p-3 rounded-lg border border-blue-900/30">
+                      "{msgBody}"
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-2 flex flex-col sm:flex-row gap-3 justify-center">
+                  <a
+                    href={`https://wa.me/${BUSINESS_INFO.rawPhone}?text=${encodeURIComponent(
+                      `Kia Ora Stars Hostel Owner! My name is ${msgName} (${msgEmail}). I just submitted an inquiry on your website:\n\nSubject: ${msgSubject}\nMessage: ${msgBody}`
+                    )}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-sm shadow-lg shadow-emerald-950/50 transition-all cursor-pointer"
+                  >
+                    <MessageCircle className="w-5 h-5" />
+                    <span>Forward to Owner's WhatsApp</span>
+                  </a>
+                  <button
+                    onClick={() => {
+                      setIsMsgSubmitted(false);
+                      setMsgBody('');
+                    }}
+                    className="px-6 py-3.5 bg-blue-900/50 hover:bg-blue-900 text-slate-200 rounded-xl font-semibold text-sm transition-colors cursor-pointer"
+                  >
+                    Send Another Message
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleSendMessage} className="space-y-5">
+                {msgError && (
+                  <div className="p-4 bg-red-950/90 border border-red-600 rounded-2xl text-xs sm:text-sm text-red-200 flex items-start gap-3 shadow-xl">
+                    <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-bold block text-red-300">Message Error</span>
+                      <p className="mt-1 text-slate-200">{msgError}</p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="p-3.5 rounded-xl bg-blue-950/40 border border-blue-800/40 text-xs text-slate-300 flex items-center gap-2.5">
+                  <MessageSquare className="w-4 h-4 text-red-400 shrink-0" />
+                  <span>
+                    Use this form to message the owner directly about room inquiries, custom long-term stays, group bookings, or feedback.
+                  </span>
+                </div>
+
+                {/* Full Name */}
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+                    Your Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Liam Smith / Sarah Taylor"
+                    value={msgName}
+                    onChange={(e) => setMsgName(e.target.value)}
+                    className="w-full bg-[#0d1c44] border border-blue-900/60 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500"
+                  />
+                </div>
+
+                {/* Email and Phone */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+                      Your Email Address *
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      placeholder="liam@example.com"
+                      value={msgEmail}
+                      onChange={(e) => setMsgEmail(e.target.value)}
+                      className="w-full bg-[#0d1c44] border border-blue-900/60 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+                      Phone / WhatsApp (Optional)
+                    </label>
+                    <input
+                      type="tel"
+                      placeholder="+64 21 000 0000"
+                      value={msgPhone}
+                      onChange={(e) => setMsgPhone(e.target.value)}
+                      className="w-full bg-[#0d1c44] border border-blue-900/60 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500"
+                    />
+                  </div>
+                </div>
+
+                {/* Subject / Category */}
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+                    Subject / Inquiry Category *
+                  </label>
+                  <select
+                    value={msgSubject}
+                    onChange={(e) => setMsgSubject(e.target.value)}
+                    className="w-full bg-[#0d1c44] border border-blue-900/60 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-red-500 font-medium"
+                  >
+                    <option value="General Question for Owner">General Question for Hostel Owner</option>
+                    <option value="Long-term Stay Inquiry (Weekly / Monthly)">Long-term Stay Inquiry (Weekly / Monthly Discount)</option>
+                    <option value="Group Booking (6+ Guests)">Group Booking (6+ Guests)</option>
+                    <option value="Late Night Check-in / Flight Arrival Query">Late Night Check-in / Flight Arrival Query</option>
+                    <option value="Luggage Storage / Parking Inquiry">Luggage Storage / Parking Inquiry</option>
+                    <option value="Feedback or Compliment for Management">Feedback or Compliment for Management</option>
+                  </select>
+                </div>
+
+                {/* Message Body */}
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+                    Message to Owner *
+                  </label>
+                  <textarea
+                    rows={4}
+                    required
+                    placeholder="Write your message, questions, dates, or details for the owner here..."
+                    value={msgBody}
+                    onChange={(e) => setMsgBody(e.target.value)}
+                    className="w-full bg-[#0d1c44] border border-blue-900/60 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500 resize-none"
+                  />
+                </div>
+
+                {/* Submit message button */}
+                <button
+                  type="submit"
+                  disabled={isMsgSubmitting}
+                  className="w-full py-4 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold text-base rounded-xl shadow-xl shadow-red-950/50 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75"
+                >
+                  {isMsgSubmitting ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>Delivering Message to Supabase...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-5 h-5" />
+                      <span>Send Message to Owner</span>
+                    </>
+                  )}
+                </button>
+
+                <div className="flex items-center justify-between text-xs text-slate-400 pt-1">
+                  <span>Direct line: +64 21 938 777</span>
+                  <span>Saved directly in Supabase DB</span>
+                </div>
+              </form>
+            )}
           </div>
+        )}
+      </div>
 
           {/* RIGHT: Contact Information, WhatsApp & Reception (5 cols) */}
           <div className="lg:col-span-5 space-y-6">

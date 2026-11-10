@@ -7,10 +7,12 @@ import { RoomsPage } from './pages/RoomsPage';
 import { GalleryPage } from './pages/GalleryPage';
 import { ContactPage } from './pages/ContactPage';
 import { BookingModal } from './components/BookingModal';
+import { SupabaseBookingsModal } from './components/SupabaseBookingsModal';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<PageId>('home');
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const [isSupabaseModalOpen, setIsSupabaseModalOpen] = useState(false);
   const [selectedRoomId, setSelectedRoomId] = useState<string | undefined>(undefined);
 
   // Sync with browser hash if present (e.g., #rooms, #gallery, #contact)
@@ -78,6 +80,7 @@ export default function App() {
       <Footer
         setCurrentPage={handlePageChange}
         onOpenBookingModal={() => handleOpenBookingModal()}
+        onOpenSupabaseModal={() => setIsSupabaseModalOpen(true)}
       />
 
       {/* Interactive Booking Modal */}
@@ -85,6 +88,12 @@ export default function App() {
         isOpen={isBookingModalOpen}
         onClose={() => setIsBookingModalOpen(false)}
         preSelectedRoomId={selectedRoomId}
+      />
+
+      {/* Supabase Database Live Viewer */}
+      <SupabaseBookingsModal
+        isOpen={isSupabaseModalOpen}
+        onClose={() => setIsSupabaseModalOpen(false)}
       />
     </div>
   );
